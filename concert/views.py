@@ -1,10 +1,10 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 
 from concert.forms import LoginForm, SignUpForm
 from concert.models import Concert, ConcertAttending
@@ -61,13 +61,42 @@ def photos(request):
 
 
 def login_view(request):
-    pass
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        try:
+            user = User.objects.get(username=username)
+            if user.check_password(password):
+                login(request, user)
+                return HttpResponseRedirect(reverse("index"))
+        except User.DoesNotExist:
+            return render(request, "login.html", {"form": LoginForm})
+    return render(request, "login.html", {"form": LoginForm})
+
 
 def logout_view(request):
-    pass
+    logout(request)
+    return HttpResponseRedirect(reverse("login"))
+
+
 
 def concerts(request):
-    pass
+    if {insérer le code pour vérifier si l'utilisateur est authentifié}:
+        lst_of_concert = {insérer le code pour créer une liste vide}
+        concert_objects = {insérer le code pour obtenir tous les Concerts en utilisant l'objet Concert.objects}
+        {insérer le code pour parcourir tous les éléments dans concert_objects}:
+            try:
+                status = item.attendee.filter(
+                    user=request.user).first().attending
+            except:
+                status = "-"
+            lst_of_concert.append({
+                "concert": item,
+                "status": status
+            })
+        return {insérer le code pour rendre la page `concerts.html` avec les données de {"concerts": lst_of_concert}}
+    else:
+        return {insérer le code pour rediriger l'utilisateur vers la page de connexion car l'utilisateur n'est pas authentifié}
 
 
 def concert_detail(request, id):
